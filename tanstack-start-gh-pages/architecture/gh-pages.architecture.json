@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SPA モード LP と GitHub Pages デプロイのアーキテクチャ",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "actions", "type": "cloud", "label": "GitHub Actions", "sublabel": "deploy.yml", "brand": "github-actions", "pos": [40, 170], "size": [170, 64] },
+    { "id": "vite", "type": "backend", "label": "Vite ビルド", "sublabel": "SPA + prerender", "pos": [300, 170], "size": [170, 64] },
+    { "id": "staging", "type": "cloud", "label": "デプロイ構成", "sublabel": "subdir ・ 404.html", "pos": [560, 170], "size": [180, 64] },
+    { "id": "branch", "type": "cloud", "label": "gh-pages ブランチ", "sublabel": "peaceiris", "pos": [820, 170], "size": [180, 64] },
+    { "id": "pages", "type": "cloud", "label": "GitHub Pages", "sublabel": "静的配信", "brand": "github", "pos": [1080, 170], "size": [170, 64] },
+    { "id": "browser", "type": "external", "label": "ブラウザ", "sublabel": "SPA 起動", "pos": [1080, 430], "size": [170, 64] },
+    { "id": "shell", "type": "frontend", "label": "SPA シェル", "sublabel": "_shell.html", "pos": [820, 430], "size": [180, 64] },
+    { "id": "router", "type": "frontend", "label": "TanStack Router", "sublabel": "クライアント遷移", "pos": [560, 430], "size": [180, 64] },
+    { "id": "routes", "type": "frontend", "label": "プリレンダルート", "sublabel": "/ ・ /features", "pos": [300, 430], "size": [180, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "ビルド & デプロイ", "wraps": ["actions", "vite", "staging", "branch"] },
+    { "kind": "region", "label": "SPA ランタイム", "wraps": ["browser", "shell", "router", "routes"] }
+  ],
+  "connections": [
+    { "id": "actions-vite", "from": "actions", "to": "vite", "label": "build", "variant": "emphasis" },
+    { "id": "vite-staging", "from": "vite", "to": "staging", "label": "dist/client" },
+    { "id": "staging-branch", "from": "staging", "to": "branch", "label": "push" },
+    { "id": "branch-pages", "from": "branch", "to": "pages", "label": "配信" },
+    { "id": "pages-browser", "from": "pages", "to": "browser", "label": "静的アセット", "fromSide": "bottom", "toSide": "top", "labelAt": [1165, 340] },
+    { "id": "browser-shell", "from": "browser", "to": "shell", "label": "取得" },
+    { "id": "shell-router", "from": "shell", "to": "router", "label": "起動" },
+    { "id": "router-routes", "from": "router", "to": "routes", "label": "遷移" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "SPA モード", "items": ["Vite + @tanstack/react-start", "spa.prerender で / と /features を HTML 化", "base = /tanstack-start-gh-pages/"] },
+    { "dot": "emerald", "title": "デプロイ", "items": ["GitHub Actions が dist/client をサブディレクトリへ展開", "404.html と ルートリダイレクトを同梱", "peaceiris/actions-gh-pages で gh-pages へ push"] },
+    { "dot": "orange", "title": "配信", "items": ["GitHub Pages が静的配信", "SPA シェルでクライアント遷移", "base パスでアセットを解決"] }
+  ]
+}

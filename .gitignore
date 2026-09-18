@@ -1,0 +1,10 @@
+# 提案書・設計ドキュメントは git 管理対象外
+PLAN/
+
+# macOS
+.DS_Store
+
+# 依存関係・ビルド成果物（各サブプロジェクトの .gitignore でも管理）
+node_modules/
+dist/
+.output/

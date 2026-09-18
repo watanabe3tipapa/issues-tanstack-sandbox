@@ -1,0 +1,75 @@
+name: Deploy LP to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: tanstack-start-gh-pages
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tanstack-start-gh-pages/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (SPA + prerender)
+        run: npm run build
+
+      - name: Add 404.html for SPA fallback
+        run: cp dist/client/_shell.html dist/client/404.html
+
+      - name: Stage deployment under /tanstack-start-gh-pages/
+        run: |
+          rm -rf ../deploy
+          mkdir -p ../deploy/tanstack-start-gh-pages
+          cp -R dist/client/. ../deploy/tanstack-start-gh-pages/
+
+      - name: Add site-root SPA fallback
+        run: cp ../deploy/tanstack-start-gh-pages/404.html ../deploy/404.html
+
+      - name: Add site-root redirect to LP
+        env:
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          printf '%s\n' \
+            '<!doctype html>' \
+            '<html lang="ja">' \
+            '<head>' \
+            '<meta charset="utf-8">' \
+            '<meta http-equiv="refresh" content="0; url=/${OWNER}/${REPO}/tanstack-start-gh-pages/">' \
+            '<link rel="canonical" href="https://${OWNER}.github.io/${REPO}/tanstack-start-gh-pages/">' \
+            '</head>' \
+            '<body>' \
+            '<p><a href="/${OWNER}/${REPO}/tanstack-start-gh-pages/">tanstack-start-gh-pages LP へ</a></p>' \
+            '</body>' \
+            '</html>' \
+            > ../deploy/index.html
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: deploy
+          publish_branch: gh-pages

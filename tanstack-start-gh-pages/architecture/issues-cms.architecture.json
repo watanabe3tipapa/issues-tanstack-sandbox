@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "GitHub Issues CMS のアーキテクチャ",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "browser", "type": "external", "label": "ブラウザ", "sublabel": "SSR / SPA", "pos": [40, 340], "size": [130, 60] },
+    { "id": "router", "type": "frontend", "label": "TanStack Router", "sublabel": "ファイルベースルート", "pos": [250, 340], "size": [160, 64] },
+    { "id": "components", "type": "frontend", "label": "UI コンポーネント", "sublabel": "PostList / MarkdownBody", "pos": [250, 160], "size": [160, 64] },
+    { "id": "serverFns", "type": "backend", "label": "Server Functions", "sublabel": "getPosts / getPostBySlug", "pos": [540, 340], "size": [180, 64] },
+    { "id": "parser", "type": "backend", "label": "Issue → Post 変換", "sublabel": "gray-matter", "pos": [540, 160], "size": [180, 64] },
+    { "id": "ghClient", "type": "backend", "label": "GitHub クライアント", "sublabel": "github.server.ts", "tag": "トークンはサーバー限定", "pos": [850, 340], "size": [180, 64] },
+    { "id": "ghApi", "type": "external", "label": "GitHub REST API", "sublabel": "api.github.com", "brand": "github", "pos": [1100, 340], "size": [170, 64] },
+    { "id": "issues", "type": "external", "label": "GitHub Issues", "sublabel": "status:published", "brand": "github", "pos": [1100, 560], "size": [170, 64] },
+    { "id": "actions", "type": "cloud", "label": "GitHub Actions", "sublabel": "build:static でプリレンダ", "brand": "github-actions", "pos": [540, 560], "size": [180, 64] },
+    { "id": "pages", "type": "cloud", "label": "GitHub Pages", "sublabel": "dist/client を配信", "brand": "github", "pos": [850, 560], "size": [160, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "TanStack Start アプリ（SSR / プリレンダ）", "wraps": ["components", "router", "parser", "serverFns"] },
+    { "kind": "region", "label": "GitHub Pages 配信", "wraps": ["actions", "pages"] }
+  ],
+  "connections": [
+    { "id": "browser-router", "from": "browser", "to": "router", "label": "リクエスト", "variant": "emphasis" },
+    { "id": "router-serverfns", "from": "router", "to": "serverFns", "label": "loader" },
+    { "id": "serverfns-ghclient", "from": "serverFns", "to": "ghClient", "label": "Issue 取得" },
+    { "id": "ghclient-ghapi", "from": "ghClient", "to": "ghApi", "label": "REST" },
+    { "id": "ghapi-issues", "from": "ghApi", "to": "issues", "label": "status:published", "fromSide": "bottom", "toSide": "top", "labelAt": [1185, 478] },
+    { "id": "router-components", "from": "router", "to": "components", "label": "描画" },
+    { "id": "serverfns-parser", "from": "serverFns", "to": "parser", "label": "frontmatter" },
+    { "id": "actions-pages", "from": "actions", "to": "pages", "label": "デプロイ" },
+    { "id": "actions-serverfns", "from": "actions", "to": "serverFns", "label": "ビルド時", "variant": "dashed", "fromSide": "top", "toSide": "bottom", "labelAt": [630, 470] }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "コンテンツ源", "items": ["GitHub Issues を CMS として利用", "status:published ラベルで公開を制御", "frontmatter で slug / tags / 日付を指定"] },
+    { "dot": "emerald", "title": "アプリケーション", "items": ["TanStack Router の loader が Server Functions を呼ぶ", "gray-matter で Issue 本文を Post に変換", "react-markdown + remark-gfm で描画", "GitHub トークンは .server.ts に隔離"] },
+    { "dot": "orange", "title": "配信", "items": ["GitHub Actions が build:static で全ページをプリレンダ", "dist/client を GitHub Pages へ公開", "Issue の更新がデプロイをトリガー"] }
+  ]
+}
