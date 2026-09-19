@@ -122,8 +122,8 @@ issues-tanstack-sandbox/
 ## 連絡先 / 公開サイト
 
 - GitHub: https://github.com/watanabe3tipapa/issues-tanstack-sandbox
-- 公開サイト (GitHub Pages, 予定): https://watanabe3tipapa.github.io/issues-tanstack-sandbox/tanstack-start-gh-pages/
-  - ※ リポジトリは Public 済み。初回 push 後に Settings → Pages → Deploy from a branch（`gh-pages` / root）を設定すると公開されます
+- 公開サイト (GitHub Pages, 公開中): https://watanabe3tipapa.github.io/issues-tanstack-sandbox/tanstack-start-gh-pages/
+  - `gh-pages` ブランチ（Source: Deploy from a branch / root）から配信しています。main への push で自動更新されます
 
 ---
 
