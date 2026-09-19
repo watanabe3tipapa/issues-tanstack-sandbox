@@ -206,6 +206,61 @@ tanstack-start-gh-pages/README.md                                  # ルート�
 
 ---
 
+## 2026-09-19 — LP 調整（Neo Brutalism）と本番 base パス修正
+
+### やったこと
+
+- **本番でアセット / iframe が 404 になる根本原因を修正**
+  - `vite.config.ts` の `base` を `/tanstack-start-gh-pages/`（env `BASE_PATH`）のままにすると、
+    GitHub Pages の実配置 `/issues-tanstack-sandbox/tanstack-start-gh-pages/` とズレて
+    **絶対パス参照がすべて repo プレフィックス欠落で 404** になることを実機で確認
+    （LP が無スタイル化し、Archify iframe も空＝「図が載っていない」の原因）
+  - CI のビルドを `BASE_PATH=/${GITHUB_REPOSITORY##*/}/tanstack-start-gh-pages/ npm run build` に変更
+  - ヘッドレス Chrome（CDP）で検証し、CSS 適用（`rgb(245,239,224)`）と iframe 内 SVG 描画（~787px）を確認
+- **LP を Neo Brutalism テーマへ全面リデザイン**
+  - 太いボーダー（3px）・ハードシャドウ（6px+ offset）・原色ブロック（orange / yellow / cyan / lime / pink）
+  - ルーティングマーキー（ヘッダー下の流れるテープ）、ヒーローの回転ステッカー（SPA MODE / TYPE SAFE / NO SSR）
+  - カード・ボタン・CTA・404・フッターを brutalist 調に。角丸なし・モノラベル
+  - `/architecture` の iframe は `aspect-ratio` をやめ明示 `height`（640px / モバイル 460px）にして確実に表示
+
+### 変更ファイル
+
+```
+tanstack-start-gh-pages/src/styles.css              # Neo Brutalism 全面書き換え
+tanstack-start-gh-pages/src/routes/{__root,index}.tsx  # マーキー・ステッカー追加
+tanstack-start-gh-pages/src/routes/features.tsx     # base パス管理の説明を更新
+.github/workflows/deploy.yml                        # 本番 BASE_PATH でビルド
+tanstack-start-gh-pages/README.md                   # base パス / テーマ説明を更新
+```
+
+### 検証結果
+
+- `npm run generate-routes` / `npm run typecheck` クリーン
+- `BASE_PATH=/issues-tanstack-sandbox/tanstack-start-gh-pages/ npm run build` 成功
+  - 出力の参照がすべて `/issues-tanstack-sandbox/tanstack-start-gh-pages/` プレフィックス付きになることを確認
+  - プリレンダ 6 ページ（`/` , `/issues-tanstack-sandbox/tanstack-start-gh-pages/` , `/features` , `/architecture` , `/architecture/*.html`）
+- ローカルプレビュー + CDP 実証: CSS 適用あり / iframe 881px・内側 SVG 787px 描画
+
+### 技術メモ・落とし穴
+
+1. **基準パスは「実配置パス」と必ず一致させる**
+   リポジトリサイトの GitHub Pages は `https://<user>.github.io/<repo>/<subdir>/` で配信される。
+   Vite の `base`（= `<base>` / アセットパスの基準）は絶対パスを生成するため、repo プレフィックス分も含めないと
+   ページ自体は 200 でも CSS/JS/iframe がすべて 404 になる。**このバグはヘッドレス Chrome で CSS の
+   適用有無とコンポーネントサイズを見るまで気づけない**。
+
+2. **iframe のサイズ指定は `aspect-ratio` より明示 `height` が堅牢**
+   iframe は置換要素で既定 300×150。`loading="lazy"` との組み合わせで内側の高さが空になると
+   見た目「図が無い」状態になる。今回は明示高さで解決。
+
+### 未解決・今後の課題
+
+- [ ] OGP 画像・SNS 埋め込みメタの追加（'2026-09-19 スキャフォールド' から継続）
+- [ ] フォーム等、サーバー関数が必要な機能は GitHub Pages で使えないため外部サービス連携を検討
+- [ ] issues-cms を公開する場合の方式統一（gh-pages ブランチ集約 or 別リポジトリ）
+
+---
+
 ## 追録テンプレート（今後この形式で追記する）
 
 ```

@@ -77,6 +77,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
         </header>
+        <div className="ticker" aria-hidden="true">
+          <div className="ticker-track">
+            <span>TanStack Start ✦ GitHub Pages ✦ SPA Mode ✦ Type Safe ✦ Static Prerender ✦ </span>
+            <span>TanStack Start ✦ GitHub Pages ✦ SPA Mode ✦ Type Safe ✦ Static Prerender ✦ </span>
+          </div>
+        </div>
         {children}
         <footer className="site-footer">
           <div className="container">

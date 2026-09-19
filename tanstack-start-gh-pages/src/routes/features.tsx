@@ -31,7 +31,7 @@ const items = [
   },
   {
     title: 'base パス管理',
-    body: 'サブディレクトリ配下へデプロイするため vite.config.ts の base を /tanstack-start-gh-pages/ に設定。アセットパスの解決を厳密に行います。',
+    body: 'サブディレクトリ配下へデプロイするため vite.config.ts の base を /tanstack-start-gh-pages/ に設定。本番ビルドでは BASE_PATH で /<リポジトリ名>/tanstack-start-gh-pages/ へ基準パスを解決します。',
   },
   {
     title: '404 フォールバック',

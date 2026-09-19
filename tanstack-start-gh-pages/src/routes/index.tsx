@@ -42,6 +42,9 @@ function Home() {
     <main>
       <section className="hero">
         <div className="container">
+          <span className="sticker sticker-a">SPA MODE</span>
+          <span className="sticker sticker-b">TYPE SAFE</span>
+          <span className="sticker sticker-c">NO SSR ✦</span>
           <p className="eyebrow">TanStack Start × GitHub Pages</p>
           <h1>
             型安全 × 高速配信

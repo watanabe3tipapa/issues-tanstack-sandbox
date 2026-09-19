@@ -33,10 +33,11 @@ TanStack は、フロントエンド開発の「土台（インフラ）」を�
 
 - **SPA モード** — SSR が不要な LP 向け。ビルド後に shell HTML（`_shell.html`）を生成
 - **静的プリレンダリング** — 主要ルート（`/` ・ `/features` ・ `/architecture`）をビルド時に HTML 化
-- **base パス管理** — サブディレクトリ配下のデプロイ前提で、`vite.config.ts` の `base` を `/tanstack-start-gh-pages/` に設定しアセットパスを補正
+- **base パス管理** — サブディレクトリ配下のデプロイ前提で、`vite.config.ts` の `base` を `/tanstack-start-gh-pages/` に設定し、本番ビルドでは `BASE_PATH` で repo プレフィックス付き絶対パスへ補正
 - **404 フォールバック** — `_shell.html` を `404.html` としてコピーし、未到達パスでも SPA がハイドレーション遷移できます
 - **自動デプロイ** — リポジトリルートの GitHub Actions が、ビルド → 404 生成 → `gh-pages` ブランチ展開までを 1 回の push で完結
 - **アーキテクチャ図ページ** — `/architecture` で、この構成と CMS の構造を Archify の図として掲載
+- **Neo Brutalism テーマ** — 太いボーダー・ハードシャドウ・原色ブロックの LP デザイン
 
 ---
 
@@ -139,11 +140,16 @@ cp dist/client/_shell.html dist/client/404.html
 
 ### base パス
 
-デフォルトは `/tanstack-start-gh-pages/` です。環境変数で上書きできます。
+デフォルトは `/tanstack-start-gh-pages/` です。環境変数 `BASE_PATH` で上書きできます。
 
 ```bash
-BASE_PATH=/tanstack-start-gh-pages/ npm run build
+BASE_PATH=/tanstack-start-gh-pages/ npm run build   # ローカル（バイロット購入前の確認用）
+BASE_PATH=/issues-tanstack-sandbox/tanstack-start-gh-pages/ npm run build  # 本番相当（repo プレフィックス付き）
 ```
+
+本番ビルドでは GitHub Pages の実際の配置パス（`https://<user>.github.io/<repo>/tanstack-start-gh-pages/`）に
+**repo プレフィックス付きの絶対パス**が必要です。CI は `BASE_PATH=/${GITHUB_REPOSITORY##*/}/...` で自動解決します
+（アプリの base と実配置がズレると、アセット・iframe がすべて 404 になります）。
 
 ### GitHub Pages への公開
 
@@ -157,7 +163,7 @@ BASE_PATH=/tanstack-start-gh-pages/ npm run build
    - ビルド → `404.html` 生成 → `tanstack-start-gh-pages/` 配下にステージング → `peaceiris/actions-gh-pages` で `gh-pages` へ展開
    - サイトルートには LP へのリダイレクト `index.html` と SPA 用 `404.html` を配置
 3. 公開 URL: `https://<user>.github.io/issues-tanstack-sandbox/tanstack-start-gh-pages/`
-   - アプリの base が `/tanstack-start-gh-pages/` のため、`gh-pages` ブランチの同名ディレクトリ配下に展開されます
+   - 本番ビルドは `BASE_PATH=/issues-tanstack-sandbox/tanstack-start-gh-pages/` で生成され、`gh-pages` ブランチの同名ディレクトリ配下へ展開されます
 
 ---
 
@@ -186,7 +192,7 @@ BASE_PATH=/tanstack-start-gh-pages/ npm run build
     │   │   ├── features.tsx   # 機能紹介ページ
     │   │   └── architecture.tsx   # アーキテクチャ図ページ
     │   ├── router.tsx         # ルーター設定
-    │   └── styles.css         # ダークテーマ LP
+    │   └── styles.css         # Neo Brutalism テーマ LP
     ├── architecture/          # Archify 仕様 JSON（図の元データ・検証対象）
     ├── public/
     │   └── architecture/      # Archify 生成の単体 HTML（iframe 埋め込みに使用）
